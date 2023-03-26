@@ -42,13 +42,7 @@ app.post("/authenticate", function (req, res) {
 	res.send(jsonString)
 })
 
-/**
- * Send request to Postgresql server
- * @param {*} req 
- * @param {*} res 
- * @param {*} sqlRequest 
- * @param {*} values 
- */
+//send SQL request and return result
 function getSQLResult (req, res, sqlRequest, values) {
 	var client = new pg.Client(conString)
 	client.connect(function (err) {
@@ -80,20 +74,13 @@ function getSQLResult (req, res, sqlRequest, values) {
 	})
 }
 
-/**
- * Get users list
- */
+// Get all users
 app.post("/users", function (req, res) {
 	var sqlRequest = "SELECT * FROM Person ORDER BY Person_LastName, Person_FirstName"
 	var values = []
 	getSQLResult(req, res, sqlRequest, values)
 })
 
-app.get("/users", function (req, res) {
-	var sqlRequest = "SELECT * FROM Person ORDER BY Person_LastName, Person_FirstName"
-	var values = []
-	getSQLResult(req, res, sqlRequest, values)
-})
 
 app.post("/user", function (req, res) {
 	var id = req.body.id
@@ -134,21 +121,13 @@ app.post("/deleteUser", function (req, res) {
 	getSQLResult(req, res, sqlRequest, values)
 })
 
-
-/**
- * Get books list
- */
+// Get books list
 app.post("/books", function (req, res) {
 	var sqlRequest = "SELECT * FROM Book ORDER BY Book_Title, Book_Authors"
 	var values = []
 	getSQLResult(req, res, sqlRequest, values)
 })
 
-app.get("/books", function (req, res) {
-	var sqlRequest = "SELECT * FROM Book ORDER BY Book_Title, Book_Authors"
-	var values = []
-	getSQLResult(req, res, sqlRequest, values)
-})
 
 app.post("/book", function (req, res) {
 	var id = req.body.id
@@ -188,9 +167,7 @@ app.post("/deleteBook", function (req, res) {
 	getSQLResult(req, res, sqlRequest, values)
 })
 
-/**
- * Get borrows
- */
+// Get borrows list for a User
 app.post("/borrows", function (req, res) {
 	var person_id = req.body.person_id
 	var sqlRequest = "SELECT Borrow.*, Book_Title FROM Borrow JOIN Book USING (Book_ID) WHERE Person_ID=$1 ORDER BY Borrow_ID"
