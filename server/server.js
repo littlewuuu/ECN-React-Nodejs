@@ -14,9 +14,6 @@ app.use(function (req, res, next) {
 	next()
 })
 
-/**
- * Only to check it works
- */
 app.get("/", function (req, res) {
 	var jsonString
 	jsonString = JSON.stringify({ ok: 1 })
@@ -52,6 +49,7 @@ function getSQLResult (req, res, sqlRequest, values) {
 			res.status(500).end('Database connection error!')
 		} else {
 			// Connection is OK
+			console.log("sqlRequest : " + sqlRequest + "\nvalues : " + values + "\n")
 			client.query(sqlRequest, values, function (err, result) {
 				if (err) {
 					// Request fails
@@ -63,7 +61,9 @@ function getSQLResult (req, res, sqlRequest, values) {
 					for (var ind in result.rows) {
 						results.push(result.rows[ind])
 					}
+					console.log("results : ")
 					console.log(results)
+					console.log("----------------------------------------")
 					// Convert object to a JSON string and send it back
 					res.setHeader('Content-Type', 'application/json')
 					res.send(JSON.stringify(results))
@@ -81,13 +81,14 @@ app.post("/users", function (req, res) {
 	getSQLResult(req, res, sqlRequest, values)
 })
 
-
+// get non returned users
 app.post("/user", function (req, res) {
 	var id = req.body.id
 	var sqlRequest = "SELECT * FROM Person WHERE person_id=$1"
 	var values = [id]
 	getSQLResult(req, res, sqlRequest, values)
 })
+
 
 app.post("/saveUser", function (req, res) {
 	var person_id = req.body.person_id
@@ -136,6 +137,7 @@ app.post("/book", function (req, res) {
 	getSQLResult(req, res, sqlRequest, values)
 })
 
+//add a new book or update an existing one
 app.post("/saveBook", function (req, res) {
 	var book_id = req.body.book_id
 	var book_title = req.body.book_title
@@ -167,13 +169,28 @@ app.post("/deleteBook", function (req, res) {
 	getSQLResult(req, res, sqlRequest, values)
 })
 
-// Get borrows list for a User
+// Get all non returned borrows
 app.post("/borrows", function (req, res) {
-	var person_id = req.body.person_id
-	var sqlRequest = "SELECT Borrow.*, Book_Title FROM Borrow JOIN Book USING (Book_ID) WHERE Person_ID=$1 ORDER BY Borrow_ID"
-	var values = [person_id]
+	var sqlRequest = "SELECT Borrow.*, Book_Title FROM Borrow JOIN Book USING (Book_ID) "
+		+ "Where Borrow.borrow_return is null ORDER BY Borrow_ID"
+	values = []
 	getSQLResult(req, res, sqlRequest, values)
 })
+
+// app.post("/borrows", function (req, res) {
+// 	var person_id = req.body.person_id
+// 	var sqlRequest = "SELECT Borrow.*, Book_Title FROM Borrow JOIN Book USING (Book_ID) WHERE Person_ID=$1 ORDER BY Borrow_ID"
+// 	var values = [person_id]
+// 	getSQLResult(req, res, sqlRequest, values)
+// })
+
+
+// get all borrows
+app.post("/borrowlist", function (req, res) {
+	var sqlRequest = "SELECT Borrow.*, Book_Title FROM Borrow JOIN Book join Person USING (Book_ID) ORDER BY Borrow_ID"
+	getSQLResult(req, res, sqlRequest, values)
+})
+
 
 app.post("/borrow", function (req, res) {
 	var id = req.body.id
